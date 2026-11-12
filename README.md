@@ -1,65 +1,33 @@
 # 觅食指南
 
-由于学校食之力式微，越来越多窗口关闭，导致学校美味的食物越来越少，越来越多的人选择外卖和拼好饭。鄙人深感痛心，作为一名学校的资深小饕，出于记录和指引下学期新同学觅食的想法，写了这个觅食指南
-
-线上地址：
-
-```text
-https://zgrx.github.io/personal-blog/
-```
-
-## 当前内容
-
-目前主要记录四个餐厅：
-
-- 龙山厅
-- 凤凰厅
-- 天烛厅
-- 东岳厅
-
-## 内容结构
-
-- `docs/index.md`：博客首页
-- `docs/about.md`：关于页
-- `docs/life/`：餐厅记录页面和图片目录
-- `docs/.vitepress/config.mts`：VitePress 配置、导航和侧边栏
-- `docs/.vitepress/theme/`：站点样式和页面切换动画
+校园食堂窗口点评。现有资料包含凤凰厅、东岳厅、天烛厅和龙山厅的 22 个窗口。原作者的照片、点评和推荐指数来自 `docs/life/`，同学评分由 Supabase 单独统计。
 
 ## 本地运行
 
-第一次运行前安装依赖：
+需要 Node.js 22.12 或更高版本。
 
-```bash
-npm install
-```
-
-启动本地预览：
-
-```bash
+```sh
+npm ci
 npm run dev
 ```
 
-因为站点配置了 `base: '/personal-blog/'`，本地预览时访问：
+可以直接浏览目录、筛选窗口和查看探店笔记。要启用邮箱登录、共享评分和文字点评，请连接 Supabase。
 
-```text
-http://localhost:5173/personal-blog/
-```
+## 连接 Supabase
 
-构建静态文件：
+1. 在 Supabase 项目的 SQL Editor 执行 [数据库迁移](supabase/migrations/202611120001_canteen_reviews.sql)。已接入 Supabase CLI 的项目也可用迁移流程应用该文件。
+2. 在 Authentication 中启用 Email provider 和注册。在 Magic Link 邮件模板中放入验证码变量 `{{ .Token }}`，例如 `<p>觅食指南验证码：{{ .Token }}</p>`。面向同学使用时配置自定义 SMTP，使项目可以向普通用户发送邮件。
+3. 把 `.env.example` 复制为 `.env.local`，填入 `VITE_SUPABASE_URL` 和 `VITE_SUPABASE_PUBLISHABLE_KEY`，重启开发服务器。前端只能使用 publishable key，不能使用 secret 或 service-role key。
 
-```bash
+每个账号对每个窗口可保存一条评价，并可编辑或删除。浏览者只读取汇总、分数、点评文字和时间。评论中请勿填写个人联系方式。
+
+## GitHub Pages
+
+在仓库 **Settings → Secrets and variables → Actions → Variables** 配置与本地相同的两个公开变量。合并到 `main` 后，现有 GitHub Actions 流程会构建并上传 `dist/`。如果稍后补配变量，可重新运行部署工作流。
+
+```sh
 npm run build
+npm run preview
 ```
 
-## 发布
-
-代码推送到 `main` 分支后，GitHub Actions 会自动构建并发布到 GitHub Pages。
-
-常用流程：
-
-```bash
-git status
-git add <changed-files>
-git commit -m "update canteen blog"
-git push
-```
+详情页使用 `?stall=窗口编号`，所以 GitHub Pages 可以直接访问和刷新详情页。新增窗口时，更新原始笔记、`src/catalogue.ts` 中的窗口编号，并用新迁移把编号加入数据库。

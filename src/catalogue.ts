@@ -13,11 +13,13 @@ export function photoUrl(path?: string) {
   return photos['../docs/life/campus-canteens-images/' + path?.split('/').pop()]
 }
 
+export const taiAnCampus = { id: 'taian', name: '泰安校区' } as const
+
 export const halls = [
-  { id: 'fenghuang', name: '凤凰厅' },
-  { id: 'dongyue', name: '东岳厅' },
-  { id: 'tianzhu', name: '天烛厅' },
-  { id: 'longshan', name: '龙山厅' },
+  { id: 'fenghuang', name: '凤凰厅', campus: taiAnCampus },
+  { id: 'dongyue', name: '东岳厅', campus: taiAnCampus },
+  { id: 'tianzhu', name: '天烛厅', campus: taiAnCampus },
+  { id: 'longshan', name: '龙山厅', campus: taiAnCampus },
 ] as const
 
 type Hall = (typeof halls)[number]
@@ -28,6 +30,7 @@ export interface Stall {
   hall: Hall
   category: string
   note: string
+  recommendation?: string
   cover?: string
   location?: string
 }
@@ -48,6 +51,7 @@ function readHall(hall: Hall, markdown: string, entries: Record<string, [string,
     foundIds.add(id)
     return {
       id, name, hall, category, note,
+      recommendation: note.match(/^推荐指数[：:]?\s*(.+)$/m)?.[1]?.trim(),
       cover: photoUrl(note.match(/!\[[^\]]*\]\(([^)]+)\)/)?.[1]),
       location: note.match(/^位置[：:][ \t]*(.+)$/m)?.[1]?.trim(),
     }
